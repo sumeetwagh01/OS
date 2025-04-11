@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banker's Algorithm</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2980b9;
+            --accent-color: #e74c3c;
+            --text-color: #333;
+            --light-bg: #f5f7fa;
+            --white: #ffffff;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
+            padding: 20px;
+            color: var(--text-color);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: var(--white);
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            margin: 10px 0 0;
+            font-weight: 300;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 25px;
+        }
+
+        .input-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            align-items: flex-end;
+        }
+        
+        .input-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+        }
+        
+        input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+        }
+
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: auto;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .generate-btn {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .calculate-btn {
+            background-color: var(--accent-color);
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+        
+        .calculate-btn:hover {
+            background-color: #c0392b;
+        }
+
+        #inputFields {
+            margin: 25px 0;
+            background-color: var(--light-bg);
+            padding: 20px;
+            border-radius: 12px;
+        }
+
+        .process-container {
+            background-color: var(--white);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        .process-header {
+            font-weight: 600;
+            margin-top: 0;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+            color: var(--primary-color);
+        }
+        
+        .resource-inputs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .resource-input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        #output {
+            margin-top: 30px;
+        }
+        
+        .result-section {
+            background-color: var(--white);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: var(--shadow);
+        }
+        
+        .result-section h2 {
+            color: var(--primary-color);
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .matrix-table th, .matrix-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+
+        .matrix-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .matrix-table tr:nth-child(even) {
+            background-color: var(--light-bg);
+        }
+        
+        .summary-table th, .summary-table td {
+            padding: 12px 15px;
+            text-align: center;
+            border: 1px solid #eee;
+        }
+        
+        .summary-table th {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: 500;
+        }
+        
+        .summary-table tr:nth-child(even) {
+            background-color: var(--light-bg);
+        }
+        
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .safe-sequence {
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+            background-color: #e8f4f8;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-weight: 500;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+        }
+        
+        .safe-sequence p {
+            margin: 0;
+        }
+        
+        .arrow {
+            color: var(--accent-color);
+            margin: 0 10px;
+            font-weight: bold;
+        }
+        
+        .explanation {
+            background-color: var(--light-bg);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .explanation h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+        
+        .step {
+            padding: 5px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        
+        .deadlock {
+            color: var(--accent-color);
+            font-weight: 500;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 15px;
+            font-size: 0.9rem;
+            color: #777;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Banker's Algorithm Simulator</h1>
+            <p>A resource allocation and deadlock avoidance algorithm</p>
+        </div>
+        
+        <div class="content">
+            <div class="explanation">
+                <h3>About Banker's Algorithm</h3>
+                <p>The Banker's Algorithm is a deadlock avoidance algorithm used in operating systems. It simulates resource allocation to ensure the system never enters an unsafe state where deadlock could occur.</p>
+            </div>
+            
+            <div class="input-section">
+                <div class="input-group">
+                    <label for="numProcesses">Number of Processes:</label>
+                    <input type="number" id="numProcesses" min="1" value="3">
+                </div>
+                
+                <div class="input-group">
+                    <label for="numResources">Number of Resources:</label>
+                    <input type="number" id="numResources" min="1" value="3">
+                </div>
+                
+                <div class="generate-btn">
+                    <button onclick="generateInputFields()">Generate Input Fields</button>
+                </div>
+            </div>
+            
+            <div id="inputFields"></div>
+            
+            <button class="calculate-btn" onclick="calculateMatrices()">Calculate Safety State</button>
+            
+            <div id="output"></div>
+            
+            <div class="footer">
+                <p>Banker's Algorithm Implementation &copy; 2025</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let numProcesses, numResources;
+
+        // Generate input fields when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            generateInputFields();
+        });
+
+        function generateInputFields() {
+            numProcesses = parseInt(document.getElementById('numProcesses').value);
+            numResources = parseInt(document.getElementById('numResources').value);
+            
+            if (isNaN(numProcesses) || isNaN(numResources) || numProcesses < 1 || numResources < 1) {
+                alert("Please enter valid numbers for processes and resources (minimum 1).");
+                return;
+            }
+
+            let inputFields = document.getElementById('inputFields');
+            inputFields.innerHTML = '';
+
+            // Generate input fields for Allocation, Maximum matrices
+            for (let i = 0; i < numProcesses; i++) {
+                let processDiv = document.createElement('div');
+                processDiv.className = 'process-container';
+                
+                let processHeader = document.createElement('h3');
+                processHeader.className = 'process-header';
+                processHeader.textContent = `Process ${i + 1}`;
+                processDiv.appendChild(processHeader);
+                
+                let resourceInputs = document.createElement('div');
+                resourceInputs.className = 'resource-inputs';
+                
+                // Allocation input group
+                let allocationGroup = document.createElement('div');
+                allocationGroup.className = 'resource-input';
+                
+                let allocationLabel = document.createElement('label');
+                allocationLabel.setAttribute('for', `allocation${i}`);
+                allocationLabel.textContent = 'Allocation:';
+                allocationGroup.appendChild(allocationLabel);
+                
+                let allocationInput = document.createElement('input');
+                allocationInput.setAttribute('type', 'text');
+                allocationInput.setAttribute('id', `allocation${i}`);
+                allocationInput.setAttribute('placeholder', `e.g. ${generatePlaceholder(numResources)}`);
+                allocationGroup.appendChild(allocationInput);
+                
+                resourceInputs.appendChild(allocationGroup);
+                
+                // Maximum input group
+                let maximumGroup = document.createElement('div');
+                maximumGroup.className = 'resource-input';
+                
+                let maximumLabel = document.createElement('label');
+                maximumLabel.setAttribute('for', `maximum${i}`);
+                maximumLabel.textContent = 'Maximum:';
+                maximumGroup.appendChild(maximumLabel);
+                
+                let maximumInput = document.createElement('input');
+                maximumInput.setAttribute('type', 'text');
+                maximumInput.setAttribute('id', `maximum${i}`);
+                maximumInput.setAttribute('placeholder', `e.g. ${generatePlaceholder(numResources)}`);
+                maximumGroup.appendChild(maximumInput);
+                
+                resourceInputs.appendChild(maximumGroup);
+                
+                processDiv.appendChild(resourceInputs);
+                inputFields.appendChild(processDiv);
+            }
+
+            // Add input fields for Available Resources
+            let availableDiv = document.createElement('div');
+            availableDiv.className = 'process-container';
+            
+            let availableHeader = document.createElement('h3');
+            availableHeader.className = 'process-header';
+            availableHeader.textContent = 'Available Resources';
+            availableDiv.appendChild(availableHeader);
+            
+            let availableInput = document.createElement('input');
+            availableInput.setAttribute('type', 'text');
+            availableInput.setAttribute('id', 'availableResources');
+            availableInput.setAttribute('placeholder', `e.g. ${generatePlaceholder(numResources)}`);
+            availableDiv.appendChild(availableInput);
+            
+            inputFields.appendChild(availableDiv);
+        }
+        
+        function generatePlaceholder(count) {
+            let placeholder = [];
+            for (let i = 0; i < count; i++) {
+                placeholder.push(Math.floor(Math.random() * 5));
+            }
+            return placeholder.join(',');
+        }
+
+        function calculateMatrices() {
+            let allocation = [];
+            let maximum = [];
+            let totalResources = [];
+
+            try {
+                // Get available resources from user input
+                let availableResources = document.getElementById('availableResources').value.split(',').map(Number);
+                
+                if (availableResources.length !== numResources) {
+                    alert(`Please enter ${numResources} values for available resources`);
+                    return;
+                }
+                
+                // Check if available resources contains valid numbers
+                if (availableResources.some(isNaN)) {
+                    alert("Available resources must contain only numbers!");
+                    return;
+                }
+
+                // Validate and collect input data
+                for (let i = 0; i < numProcesses; i++) {
+                    let allocationInput = document.getElementById(`allocation${i}`).value.split(',').map(Number);
+                    let maximumInput = document.getElementById(`maximum${i}`).value.split(',').map(Number);
+                    
+                    if (allocationInput.length !== numResources || maximumInput.length !== numResources) {
+                        alert(`Please enter ${numResources} values for Process ${i+1}'s allocation and maximum`);
+                        return;
+                    }
+                    
+                    // Check if inputs contain valid numbers
+                    if (allocationInput.some(isNaN) || maximumInput.some(isNaN)) {
+                        alert(`Process ${i+1} must contain only numbers!`);
+                        return;
+                    }
+                    
+                    // Validate that allocation <= maximum
+                    for (let j = 0; j < numResources; j++) {
+                        if (allocationInput[j] > maximumInput[j]) {
+                            alert(`Error: Process ${i+1}'s allocation (${allocationInput[j]}) exceeds maximum (${maximumInput[j]}) for resource ${j+1}`);
+                            return;
+                        }
+                    }
+                    
+                    allocation.push(allocationInput);
+                    maximum.push(maximumInput);
+                }
+
+                // Calculate Total Resources
+                for (let j = 0; j < numResources; j++) {
+                    let total = availableResources[j];
+                    for (let i = 0; i < numProcesses; i++) {
+                        total += allocation[i][j];
+                    }
+                    totalResources.push(total);
+                }
+
+                // Calculate the Available Matrix (already provided as input)
+                let available = [...availableResources]; // Make a copy of Available Resources
+
+                // Calculate the Need Matrix
+                let need = [];
+                for (let i = 0; i < numProcesses; i++) {
+                    let processNeed = [];
+                    for (let j = 0; j < numResources; j++) {
+                        processNeed.push(maximum[i][j] - allocation[i][j]);
+                    }
+                    need.push(processNeed);
+                }
+
+                // Calculate Safe Sequence
+                let safeSequence = findSafeSequence(allocation, need, available);
+
+                // Display the matrices and safe sequence
+                displayMatrices(totalResources, available, need, allocation, maximum, safeSequence);
+                
+                // Generate the summary table with all values
+                displaySummaryTable(totalResources, available, need, allocation, maximum, safeSequence);
+            } catch(error) {
+                alert("An error occurred. Please check your inputs and try again.");
+                console.error(error);
+            }
+        }
+
+        function findSafeSequence(allocation, need, available) {
+            let work = [...available];
+            let finish = new Array(numProcesses).fill(false);
+            let safeSeq = [];
+            let count = 0;
+
+            // For logging the algorithm steps
+            let steps = [];
+            steps.push(`<div class="step">Starting safety algorithm with Work = [${work}] and Finish = [${finish.map(f => f ? 'T' : 'F')}]</div>`);
+
+            while (count < numProcesses) {
+                let processFound = false;
+                
+                for (let i = 0; i < numProcesses; i++) {
+                    if (!finish[i] && isLessThanOrEqual(need[i], work)) {
+                        // Add step information
+                        steps.push(`<div class="step">Process P${i+1}: Need [${need[i]}] ≤ Work [${work}], can be allocated</div>`);
+                        for (let j = 0; j < numResources; j++) {
+                            work[j] += allocation[i][j];
+                        }
+                        steps.push(`<div class="step">Resources released from P${i+1}, now Work = [${work}]</div>`);
+                        finish[i] = true;
+                        safeSeq.push(`P${i + 1}`);
+                        count++;
+                        processFound = true;
+                        break;
+                    }
+                }
+                
+                if (!processFound) {
+                    steps.push(`<div class="step deadlock">No process can be allocated safely. <strong>Deadlock risk detected!</strong></div>`);
+                    document.getElementById('output').innerHTML = `
+                        <div class="result-section explanation">
+                            <h3>Algorithm Steps</h3>
+                            ${steps.join('')}
+                        </div>`;
+                    return ["No Safe Sequence (Deadlock detected)"];
+                }
+            }
+            
+            document.getElementById('output').innerHTML = `
+                <div class="result-section explanation">
+                    <h3>Algorithm Steps</h3>
+                    ${steps.join('')}
+                </div>`;
+            return safeSeq;
+        }
+
+        function isLessThanOrEqual(arr1, arr2) {
+            for (let i = 0; i < arr1.length; i++) {
+                if (arr1[i] > arr2[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        function displayMatrices(totalResources, available, need, allocation, maximum, safeSequence) {
+            let output = document.getElementById('output');
+            
+            // Add total resources table
+            let totalResourcesSection = document.createElement('div');
+            totalResourcesSection.className = 'result-section';
+            totalResourcesSection.innerHTML = `<h2>Total Resources</h2>`;
+            
+            let resourceHeader = '';
+            let resourceRows = [];
+            
+            for (let j = 0; j < numResources; j++) {
+                resourceHeader += `<th>R${j+1}</th>`;
+                resourceRows.push(`<td>${totalResources[j]}</td>`);
+            }
+            
+            totalResourcesSection.innerHTML += `
+                <table class="matrix-table">
+                    <tr><th>Resource Type</th>${resourceHeader}</tr>
+                    <tr><td>Amount</td>${resourceRows.join('')}</tr>
+                </table>`;
+            
+            output.appendChild(totalResourcesSection);
+
+            // Add available resources table
+            let availableSection = document.createElement('div');
+            availableSection.className = 'result-section';
+            availableSection.innerHTML = `<h2>Available Resources</h2>`;
+            
+            let availRows = [];
+            for (let j = 0; j < numResources; j++) {
+                availRows.push(`<td>${available[j]}</td>`);
+            }
+            
+            availableSection.innerHTML += `
+                <table class="matrix-table">
+                    <tr><th>Resource Type</th>${resourceHeader}</tr>
+                    <tr><td>Available</td>${availRows.join('')}</tr>
+                </table>`;
+            
+            output.appendChild(availableSection);
+
+            // Create matrices section
+            let matricesSection = document.createElement('div');
+            matricesSection.className = 'result-section';
+            matricesSection.innerHTML = `<h2>Process Resource Tables</h2>`;
+            
+            // Allocation Table
+            matricesSection.innerHTML += `<h3>Allocation Matrix</h3>`;
+            let allocTable = `<table class="matrix-table"><tr><th>Process</th>${resourceHeader}</tr>`;
+            for (let i = 0; i < numProcesses; i++) {
+                allocTable += `<tr><td>P${i + 1}</td>`;
+                for (let j = 0; j < numResources; j++) {
+                    allocTable += `<td>${allocation[i][j]}</td>`;
+                }
+                allocTable += `</tr>`;
+            }
+            allocTable += `</table>`;
+            matricesSection.innerHTML += allocTable;
+            
+            // Maximum Table
+            matricesSection.innerHTML += `<h3>Maximum Matrix</h3>`;
+            let maxTable = `<table class="matrix-table"><tr><th>Process</th>${resourceHeader}</tr>`;
+            for (let i = 0; i < numProcesses; i++) {
+                maxTable += `<tr><td>P${i + 1}</td>`;
+                for (let j = 0; j < numResources; j++) {
+                    maxTable += `<td>${maximum[i][j]}</td>`;
+                }
+                maxTable += `</tr>`;
+            }
+            maxTable += `</table>`;
+            matricesSection.innerHTML += maxTable;
+            
+            // Need Table
+            matricesSection.innerHTML += `<h3>Need Matrix</h3>`;
+            let needTable = `<table class="matrix-table"><tr><th>Process</th>${resourceHeader}</tr>`;
+            for (let i = 0; i < numProcesses; i++) {
+                needTable += `<tr><td>P${i + 1}</td>`;
+                for (let j = 0; j < numResources; j++) {
+                    needTable += `<td>${need[i][j]}</td>`;
+                }
+                needTable += `</tr>`;
+            }
+            needTable += `</table>`;
+            matricesSection.innerHTML += needTable;
+            
+            output.appendChild(matricesSection);
+
+            // Add safe sequence section
+            let sequenceSection = document.createElement('div');
+            sequenceSection.className = 'result-section';
+            sequenceSection.innerHTML = `<h2>Safe Sequence</h2>`;
+            
+            // Format the safe sequence with arrows
+            let formattedSequence = '';
+            if (safeSequence.length === 1 && safeSequence[0].includes("No Safe")) {
+                formattedSequence = `<p class="deadlock">${safeSequence[0]}</p>`;
+            } else {
+                formattedSequence = `<p>${safeSequence.join('<span class="arrow"> → </span>')}</p>`;
+            }
+            
+            sequenceSection.innerHTML += `<div class="safe-sequence">${formattedSequence}</div>`;
+            
+            output.appendChild(sequenceSection);
+        }
+        
+        function displaySummaryTable(totalResources, available, need, allocation, maximum, safeSequence) {
+            // Create a new section for the summary table
+            let summarySection = document.createElement('div');
+            summarySection.className = 'result-section';
+            summarySection.innerHTML = `<h2>Comprehensive Summary Table</h2>`;
+            
+            // Generate the header row with resource columns
+            let resourceHeader = '';
+            for (let j = 0; j < numResources; j++) {
+                resourceHeader += `<th colspan="3">Resource ${j+1}</th>`;
+            }
+            
+            // Start building the summary table
+            let summaryTable = `
+                <table class="summary-table">
+                    <tr>
+                        <th rowspan="2">Process</th>
+                        ${resourceHeader}
+                        <th rowspan="2">Safe State</th>
+                    </tr>
+                    <tr>`;
+            
+            // Add sub-headers for Allocation, Max, Need
+            for (let j = 0; j < numResources; j++) {
+                summaryTable += `
+                    <th>Alloc</th>
+                    <th>Max</th>
+                    <th>Need</th>`;
+            }
+            summaryTable += `</tr>`;
+            
+            // Add rows for each process
+            for (let i = 0; i < numProcesses; i++) {
+                summaryTable += `<tr><td>P${i + 1}</td>`;
+                
+                // Add columns for each resource's Allocation, Max, Need
+                for (let j = 0; j < numResources; j++) {
+                    summaryTable += `
+                        <td>${allocation[i][j]}</td>
+                        <td>${maximum[i][j]}</td>
+                        <td>${need[i][j]}</td>`;
+                }
+                
+                // Is this process in the safe sequence?
+                let isInSafeSequence = safeSequence.includes(`P${i + 1}`);
+                let safeStateClass = isInSafeSequence ? "color: green; font-weight: bold;" : "color: var(--accent-color); font-weight: bold;";
+                let safeStateText = isInSafeSequence ? "Safe" : "Unsafe";
+                
+                // If there's no safe sequence at all
+                if (safeSequence.length === 1 && safeSequence[0].includes("No Safe")) {
+                    safeStateText = "Unsafe";
+                    safeStateClass = "color: var(--accent-color); font-weight: bold;";
+                }
+                
+                summaryTable += `<td style="${safeStateClass}">${safeStateText}</td></tr>`;
+            }
+            
+            // Add a row for Available resources
+            summaryTable += `<tr><td><strong>Available</strong></td>`;
+            
+            // Add Available, Total Resources, and blanks for Need
+            for (let j = 0; j < numResources; j++) {
+                summaryTable += `
+                    <td>${available[j]}</td>
+                    <td>${totalResources[j]}</td>
+                    <td>-</td>`;
+            }
+            
+            // Add final cell for the system state
+            let systemState = (safeSequence.length === 1 && safeSequence[0].includes("No Safe")) ? 
+                `<span style="color: var(--accent-color); font-weight: bold;">Deadlock Risk</span>` : 
+                `<span style="color: green; font-weight: bold;">System Safe</span>`;
+            
+            summaryTable += `<td>${systemState}</td></tr>`;
+            
+            // Add a final row for sequence
+            let sequenceDisplay = (safeSequence.length === 1 && safeSequence[0].includes("No Safe")) ?
+                `<span style="color: var(--accent-color);">${safeSequence[0]}</span>` :
+                `<span style="color: green;">${safeSequence.join(' → ')}</span>`;
+            
+            summaryTable += `
+                <tr>
+                    <td><strong>Safe Sequence</strong></td>
+                    <td colspan="${numResources * 3 + 1}" style="text-align: left; padding-left: 20px;">
+                        ${sequenceDisplay}
+                    </td>
+                </tr>`;
+            
+            // Close the table
+            summaryTable += `</table>`;
+            
+            // Add a legend
+            summaryTable += `
+                <div style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+                    <p><strong>Legend:</strong></p>
+                    <ul style="list-style-type: none; padding-left: 10px;">
+                        <li><strong>Alloc</strong> - Currently allocated resources</li>
+                        <li><strong>Max</strong> - Maximum resources that may be requested</li>
+                        <li><strong>Need</strong> - Additional resources that may be requested (Max - Alloc)</li>
+                        <li><strong>Available</strong> - Resources available for allocation</li>
+                    </ul>
+                </div>`;
+            
+            // Add the table to the section
+            summarySection.innerHTML += summaryTable;
+            
+            // Add the section to the output
+            document.getElementById('output').appendChild(summarySection);
+        }
+    </script>
+</body>
+</html>
